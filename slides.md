@@ -12,9 +12,9 @@ highlighter: shiki
 lineNumbers: false
 # some information about the slides, markdown enabled
 info: |
-  ## Antoine Coulon, Paris.js # 115
+  ## Antoine Coulon, Effect Paris # 3
   
-  Effect, une solution efficace aux problèmes de software engineering
+  Les Fibers décryptées : la force cachée derrière Effect
 # persist drawings in exports and build
 drawings:
   persist: false
@@ -22,12 +22,12 @@ drawings:
 css: unocss
 ---
 
-## **Effect, une solution efficace aux problèmes de software engineering**
+## **Les Fibers décryptées : la force cachée derrière Effect**
 
 <br>
 
 <h4 class="mt-10">
-  Antoine Coulon @ Paris.js #115 - 24/04/2024
+  Antoine Coulon @ Effect Paris #3 - 05/11/2024
 </h4>
 
 ---
@@ -40,7 +40,8 @@ css: unocss
     <div class="leading-8 mt-8 flex flex-col">
       <p class="mt-3">Lead Software Engineer @ <b color="cyan">evryg</b></p>
       <p class="mt-3">Créateur <b color="cyan">skott</b></p>
-      <p class="mt-3">Auteur <b color="cyan">effect-introduction</b></p>
+      <p class="mt-3">Auteur <b color="cyan">effect-introduction</b> </p>
+      <p class="mt-3">Evangéliste <b color="cyan">Effect</b></p>
       <p class="mt-3">Contributeur <b color="cyan">Rush.js, NodeSecure</b></p>
     </div>  
   </div>
@@ -72,600 +73,539 @@ css: unocss
 
 ---
 
-## **Effect : le <b color="green">pourquoi</b> plutôt que le <b color="orange">comment</b>**
+## **Les fondations d'Effect**
 
 <br>
 
-- Comprendre quels sont les problèmes les plus communs auxquels nous faisons face en tant que software engineers
+- La nature d'un Effect 
 
-- Prendre connaissances des limites actuelles quand on utilise TypeScript et les runtimes JavaScript
+- Les fondamentaux du runtime Effect
 
-- Apprentissage basique d'Effect
+- Qu'est-ce qu'une Fiber ?
 
 ---
 
-## **Effect ne résout pas uniquement des problèmes propres à TypeScript**
-
-<div class="grid grid-cols-2 gap-x-4 pt-5">
-
-<div class="pt-3 ml-5">
-<ul>
-<li> Explicitation </li>
-<li> Testing </li>
-<li> Résilience </li>
-<li> Concurrence </li>
-<li> Gestion des ressources </li>
-</ul>
-</div>
-
-<div class="pt-3">
-<ul>
-<li> Type-Safety </li>
-<li> Composabilité </li>
-<li> Maintenabilité </li>
-<li> Efficacité & Performance <ri-hourglass2-fill color="blue"/> </li>
-<li> Monitoring <ri-hourglass2-fill color="blue"/> </li>
-</ul>
-</div>
-
-</div>
----
-
-## **Prélude : qu'est-ce qu'un Effect**
+## **La différence fondamentale entre un Effect et une Promise**
 
 <br>
 
-Un Effect se définit à l'aide d'un datatype <b color="blue">Effect<A, E, R></b>
-- <b color="blue">[A]</b> représente le résultat qui peut être produit en cas de réussite de l'exécution
-- <b color="blue">[E]</b> représente l'ensemble des erreurs connues qui peuvent survenir lors de l'exécution
-- <b color="blue">[R]</b> représente l'ensemble des dépendances requises pour que l'Effect puisse être exécuté
+```js
+const promise = Promise.resolve(1)
 
-<br>
-
-```ts
-import { Effect } from "effect";  
-
-const randomString: Effect.Effect<string, never, never> = //
-
-const now: Effect.Effect<Date, never, Clock> = //
+const effect = Effect.succeed(1)
 ```
 
----
+<div v-click>
 
-## **Explicitation : mais où sont les erreurs et dépendances ?**
+```js
+const promise = new Promise((resolve) => {
+    console.log('Promise')
+    resolve(1)
+})
 
-<br>
-
-> La capacité à rendre un programme transparent, facile à comprendre et sans laisser de place à une quelconque ambiguité vis-à-vis de son fonctionnement.
-
-<div class="flex justify-center mt-3">
-<img width="500" src="/whereis.gif" />
-</div>
-
----
-
-## **Explicitation (erreurs) : opérations synchrones**
-
-<div class="grid grid-cols-2 gap-x-4 pt-5">
-
-<div>
-
-```ts
-// random.ts
-export function generateRandomNumber(): number {
-  // some implementation...
-}
-```
-
-```ts
-// main.ts
-import { generateRandomNumber } from "./random";
-
-function main() {
-  return generateRandomNumber() * 10;
-}
+const effect = Effect.sync(() => {
+    console.log('Effect')
+    return 1
+}) 
 ```
 </div>
 
 <div v-click>
+```bash
+$ tsx Program.ts
+> Promise
+```
+
+</div>
+
+
+---
+
+## **La stratégie d'évaluation**
+
+Une Promise est : 
+- évaluée <b color="blue">eagerly</b>
+- représente déjà une <b color="blue">opération en cours</b>
+
+Un Effect est :
+- évalué <b color="blue">lazily</b>
+- représente la <b color="blue">description d'une opération</b> 
+- est une <b color="blue">data structure immuable</b>
+
+---
+
+## **Un Effect est une description d'un programme**
+
+Le concept des Programs as Values dont le principe est de séparer :
+- la <b color="blue">description</b> d'un programme (being)
+- de son <b color="blue">interprétation</b> (doing)
+
+<div v-click>
+<br>
+Description (being)
+```ts
+const program = Effect.sync(() => 1)
+
+console.log(program)
+```
+
+```json
+{
+  _id: 'Effect',
+  _op: 'Sync',
+  effect_instruction_i0: [Function (anonymous)],
+  effect_instruction_i1: undefined,
+  effect_instruction_i2: undefined
+}
+```
+
+
+</div>
+
+--- 
+
+## **La description du programme TypeScript avec le DSL Effect**
+
+Effect est un <b color="blue">Domain Specific Language</b>
+- <b color="blue">Embedded</b>, s'intègre à un hôte en l'occurrence TypeScript
+
+- Utilise un <b color="blue">encoding initial</b>, c'est à dire que la description est séparée de l'interprétation : possibilité d'avoir plusieurs interpréteurs pour une même description
+
+```ts
+// Décrit avec TypeScript
+const program = Effect.sync(() => {})
+
+// Dont l'interprétation est déléguée
+interpreter1.run(program)
+
+interpreter2.run(program)
+
+// interpreter3 etc...
+```
+
+---
+
+## **Passer de la description à l'interprétation**
+
+```ts {3|4-10|12-13|14-25} {lines:true}
+import { Effect } from "effect"
+
+const program = Effect.sync(() => {})
+const primitive = {
+  _id: "Effect",
+  _op: "Sync",
+  effect_instruction_i0: Function,
+  effect_instruction_i1: undefined,
+  effect_instruction_i2: undefined,
+}
+
+export const DumbRuntime = {
+  runSync: <A, E, R>(program: Effect.Effect<A, E, R>) => {
+    const effect = program as {
+      _op: "Sync";
+      effect_instruction_i0: () => unknown;
+    };
+
+    switch (effect._op) {
+      case "Sync": {
+        return effect.effect_instruction_i0()
+      }
+    }
+  }
+}
+```
+
+---
+
+### **Ce qu'il se passe dans le vrai runtime Effect**
+
+https://github.com/Effect-TS/effect/blob/8a30e1dfa3a7103bf5414fc6a7fca3088d8c8c00/packages/effect/src/internal/fiberRuntime.ts#L1358
+
+```ts {3} {lines:true}
+cur = this.currentTracer.context(() => {
+  // [...]
+  return this[(cur as core.Primitive)._op](cur as core.Primitive);
+}, this);
+```
+
+```ts
+/** @internal */
+export type Primitive =
+  | Async | Commit
+  | Failure | OnFailure
+  | OnSuccess | OnStep
+  | OnSuccessAndFailure | Success | Sync
+  | UpdateRuntimeFlags | While | WithRuntime | Yield
+  | OpTag | Blocked | RunBlocked | Either.Either<any, any>
+  | Option.Option<any>
+```
+
+---
+
+## **Et il reste à implémenter...**
+
+<br>
+
+- Concurrency
+- Resource Safety
+- Stack Safety
+- Error management
+- Performance
+- etc.
+
+---
+
+## **Fiber : la primitive au coeur du runtime**
+
+Une Fiber est une unité d'exécution d'un programme qui est:
+
+- Lightweight : assimilée à un virtual/green thread, faible coût de manipulation
+- Non-blocking : faite pour gérer efficacement la concurrence (cooperative multitasking)
+- Est en charge de l'exécution d'un ou plusieurs Effects durant son cycle de vie
+- Low-level : principalement orchestrée via des opérateurs high-level, mais peut être directement contrôlée
+- Stateful : started, suspended, interrupted
+
+---
+
+## **L'exécution d'un Effect est inévitablement liée à une Fiber**
+
+<br>
+
+```ts
+import { Effect } from "effect"
+
+const log = Effect.log(`Something happening...`)
+
+Effect.runSync(log)
+```
+
+<div v-click>
+L'exécution d'un Effect est forcément liée à une Fiber
 
 ```bash
-❯ node main.js
-Error: Oops!
-    at generateRandomNumber
+$ tsx Program.ts
+> timestamp=2024-11-04T08:44:16.166Z level=INFO fiber=#0 message="Something happening..."
 ```
-
-<img width="500" src="/uncaught-exception.gif" />
-
-</div>
-
 </div>
 
 ---
 
-## **Explicitation (erreurs) : à la recherche de l'info perdue**
-
-<div>
+## **La manipulation indirecte de Fibers #1**
 
 ```ts
-// main.ts
-
-function isSomeErrorException(exception: unknown): exception is SomeError {
-  return exception instanceof Error && exception.name === "SomeError";
-}
-
-function isSomeOtherErrorException(exception: unknown): exception is SomeOtherError {
-  return exception instanceof Error && exception.name === "SomeOtherError";
-}
-
-try {
-  generateRandomNumber();
-} catch (exception: unknown) {
-  // Worst case? We don't even know what to expect from "exception"
-
-  // Best case:
-  if (isSomeErrorException(exception)) {
-    // do something
-  } else if (isSomeOtherErrorException(exception)) {
-    // do something else
-  }
-}
+pipe(
+  Effect.log("Delayed Task"),
+  Effect.delay(1000),
+  Effect.zip(Effect.log("Immediate Task"))
+)
 ```
 
-</div>
+```mermaid {scale: 0.8}
+graph LR
+Root[RootFiber #0] -->|Runs| A[DelayedTask] -->|Sequential| B[Immediate Task]
+```
 
+```bash
+timestamp=2024-11-04T09:00:59.584Z level=INFO fiber=#0 message="Delayed Task"
+timestamp=2024-11-04T09:00:59.589Z level=INFO fiber=#0 message="Immediate Task"
+```
 
 ---
 
-## **Explicitation (erreurs) : opérations asynchrones**
-
-Utilisation des Promises, une des primitives asynchrones
+## **La manipulation indirecte de Fibers #2**
 
 ```ts
-interface Promise<T> {}
-
-async function generateRandomNumber(): Promise<number> {
-  //
-}
-
-generateRandomNumber().catch((_: any) => {});
-
-try {
-  await generateRandomNumber();
-} catch (exception: unknown) {}
+pipe(
+  Effect.log("Delayed Task"),
+  Effect.delay(1000),
+  Effect.zip(Effect.log("Immediate Task"), { concurrent: true })
+)
 ```
 
-<br>
+```mermaid {scale: 0.8}
+graph LR
+Root[RootFiber #0] -->|Forks into Child Fiber #2| A[DelayedTask] 
+Root[RootFiber #0] -->|Forks into Child Fiber #3| B[Immediate Task]
+```
 
-- On fait face aux mêmes problèmes
-- Divergences/différences au niveau des APIs
-
----
-
-## **Explicitation (erreurs) : Effect à la rescousse**
-
-```ts {3-9|11-12|14-21|11-23} {lines:true}
-import { Effect, pipe } from "effect";
-
-class NumberIsTooBigError {
-  readonly _tag = "NumberIsTooBigError";
-}
-
-class NumberIsTooSmallError {
-  readonly _tag = "NumberIsTooSmallError";
-}
-
-export const generateRandomNumber: Effect.Effect<number, NumberIsTooBigError | NumberIsTooSmallError, never> = //
-
-const main = pipe(
-  generateRandomNumber,
-  // exhaustive pattern matching
-  Effect.catchTags({
-    NumberIsTooBigError: () => Effect.succeed(0),
-    NumberIsTooSmallError: () => Effect.succeed(1),
-  })
-);
-
-type main = Effect.Effect<number, never, never>;
+```bash
+timestamp=2024-11-04T09:09:08.617Z level=INFO fiber=#3 message="Immediate Task"
+timestamp=2024-11-04T09:09:09.619Z level=INFO fiber=#2 message="Delayed Task"
 ```
 
 ---
 
-## **Explicitation : et les dépendances ?**
-
-<b>Gestion explicite et puissante des erreurs typées</b>
-- filtering
-- recovery
-- mapping
-- pattern matching
+## **Un runtime Fiber-based régi par la Structured Concurrency** 
 
 <br>
 
+- Conceptualise un modèle hiérarchique pour l'ensemble des tâches
+- Offre des garanties fortes : gestion d'erreurs, scope et cycle de vie maitrisés
+- Peut être assimilé à la représentation d'un Process Tree d'un système d'exploitation
+
+<div class="grid grid-cols-2 gap-x-4">
 <div>
+```mermaid {scale: 0.8}
+graph TB
 
-```ts {0|3-4|2|all} 
-interface Effect<
-  A,  // success channel
-  E, // error channel 
-  R, // context channel
-> {}
+A[Runtime] -->|Manages| B[Root Fiber]
+B[Root Fiber] -->|forks| C[Child Fiber A]
+B[Root Fiber] -->|forks| D[Child Fiber B]
+C -->|forks| E[Child Fiber C]
 ```
 </div>
 
----
+<div>
+```mermaid {scale: 0.8}
+graph TB
 
-## **Explicitation (dépendances) : inférence automatique des dépendances**
-
-```ts {9-13|19-21|18|all} {lines:true}
-import { Context, Effect } from "effect";
-
-class UserAlreadyExistsError {
-  readonly _tag = "UserAlreadyExistsError";
-}
-
-class CreatedUser {}
-
-interface UserRepository {
-  createUser: () => Effect.Effect<CreatedUser, UserAlreadyExistsError, never>;
-}
-
-const UserRepository = Context.GenericTag<UserRepository>("UserRepository");
-
-const registerUser: Effect.Effect<
-  CreatedUser,
-  UserAlreadyExistsError, 
-  UserRepository,
-> = Effect.flatMap(UserRepository, (userRepository) => userRepository.createUser());
+A[Operating System] --> |Manages| X
+X[Root Process PID = 1] --> |Manages| Z[Zombies Process]
+X --> |Forks| B[Process A]
+B[Process A] --> |Manages| C[Thread A]
+B[Process A] --> |Manages| D[Thread B]
 ```
+</div>
+</div>
 
-<!-- 
-
-Dès lors qu'une dépendance est utilisée elle est automatiquement propagée et inférée dans le premier générique.
-
--->
 
 ---
 
-## **Explicitation (dépendances) : type-safety autour du contexte**
+<b color="blue">Effect.fork</b>: forks une child fiber, reliée au cycle de vie de la parent fiber
 
+<div class="grid grid-cols-2 gap-x-4">
 
-```ts {9-11|3,6-7|13-18|21} {lines:true}
-import { Effect, pipe } from "effect";
-
-const registerUser: Effect.Effect<
-  CreatedUser,
-  UserAlreadyExistsError,
-  UserRepository
-> = // whatever Effect there
-
-// ts(2345): Type 'UserRepository' is not assignable to type 'never'
-//             ^^^^^^^^^^^^
-Effect.runSync(registerUser);
-
-const registerUserWithSatisfiedDependencies: Effect<CreatedUser, UserAlreadyExistsError, never> = pipe(
-  registerUser,
-  Effect.provideService(UserRepository, {
-    createUser: () => Effect.succeed(new CreatedUser()),
-  })
+<div>
+```ts {all|17} {lines:true}
+const background = pipe(
+  Effect.log("background"),
+  Effect.repeat(Schedule.spaced("5 second"))
 );
 
-// compiles and works
-Effect.runSync(registerUserWithSatisfiedDependencies);
-```
+const foreground = pipe(
+  Effect.log("foreground"),
+  Effect.repeat(
+    { 
+      times: 2, 
+      schedule: Schedule.spaced("1 second") 
+    }
+  )
+);
 
-<!-- 
-
-Alors oui le côté explicite est utile pour la compréhension mais il apporte surtout de la type-safety vis à vis du compiler.
-Tant que R n'est pas "never", le programme ne compilera pas. On doit donc passer par de la DI qui est type-safe.
-
-R est inféré de manière profonde -> généraliser avec l'ensemble d'un programme
-
--->
-
-
----
-
-## **Testing**
-
-<br>
-
-> Testing c'est l'art de garantir que le système produit les résultats attendus.
-
-Effect, au service du <b color="blue">Dependency Inversion Principle</b>
-
-```ts {1-5|8,12|all} {lines:true}
-class InMemoryUserRepository implements UserRepository {
-  createUser() {
-    //
-  }
-}
-
-test("Should blabla", async () => {
-  const fakeRepository = new InMemoryUserRepository();
-
-  const user = await pipe(
-    createUser(), 
-    Effect.provideService(UserRepository, fakeRepository),
-    Effect.runPromise
+const program = Effect.gen(function* () {
+  yield* Effect.fork(background);
+  yield* foreground.pipe(
+    Effect.onExit(() => Effect.log("Bye"))
   );
-
-  expect(user).toEqual("whatever");
 });
+
+program.pipe(Effect.runFork);
+```
+</div>
+
+<div>
+
+```mermaid {scale: 0.8}
+graph LR
+Root[RootFiber #0] -->|Forks into Child Fiber #2| A[Background Task] 
 ```
 
-<!--
 
-Question: à quelle lettre correspond le DIP dans Solid ?
+```bash
+timestamp=2024-11-04T09:33:00.303Z level=INFO fiber=#0 message=foreground
+timestamp=2024-11-04T09:33:00.305Z level=INFO fiber=#1 message=background
+timestamp=2024-11-04T09:33:01.309Z level=INFO fiber=#0 message=foreground
+timestamp=2024-11-04T09:33:02.314Z level=INFO fiber=#0 message=foreground
+timestamp=2024-11-04T09:33:02.317Z level=INFO fiber=#0 message=Bye
+```
 
-Explication du DIP et de ce que ça apporte, on casse les "hidden dependencies"
+</div>
 
-Effect facilite la testabilité
-
--->
----
-
-## **Résilience**
-
-<br>
-
-> L'art de designer et d'implémenter des systèmes qui peuvent réagir à des erreurs attendues et de les gérer correctement.
-
-<br>
-
-- Recovery
-- Retries
-- Interruptions
-- Resource management
-- Circuit breakers
-- etc
+</div>
 
 ---
 
-## **Résilience : recovery et retries**
+<b color="blue">Effect.forkDaemon</b>: forks une fiber, reliée à la root fiber, détachée du parent
 
-<div class="grid grid-cols-5 gap-x-4 pt-5">
+<div class="grid grid-cols-2 gap-x-4">
 
-<div class="col-start-1 col-span-2" v-click> 
+<div>
+```ts {all|17} {lines:true}
+const background = pipe(
+  Effect.log("background"),
+  Effect.repeat(Schedule.spaced("5 second"))
+);
 
-```ts
-// RECOVERY
+const foreground = pipe(
+  Effect.log("foreground"),
+  Effect.repeat(
+    { 
+      times: 2, 
+      schedule: Schedule.spaced("1 second") 
+    }
+  )
+);
 
-import { Effect, pipe } from "effect";
+const program = Effect.gen(function* () {
+  yield* Effect.forkDaemon(background);
+  yield* foreground.pipe(
+    Effect.onExit(() => Effect.log("Bye"))
+  );
+});
 
-const program = () => pipe(
-  Effect.fail(new Error()),
-  // Recover from all errors
-  Effect.catchAll((_) => Effect.succeed(0)),
-  // Recover from all errors and provide specific behavior per error
-  Effect.catchTags({
-    _1: () => Effect.succeed(1),
-    _2: () => Effect.succeed(2)
-  }),
-  // Recover from specific errors only
-  Effect.catchTag({
-    _1: () => Effect.succeed(1)
-  })
+program.pipe(Effect.runFork);
+```
+</div>
+
+<div>
+
+```mermaid {scale: 0.8}
+graph LR
+Root[RootFiber #0] -->|Spawns a Daemon Fiber #1| Daemon[Background Task]
+Root[RootFiber #0] -->|Exits| EndOfLife[End Of Life]
+GlobalScope[Global Scope] -->|Links| Daemon[Background Task]
+```
+
+
+```bash
+timestamp=2024-11-04T09:50:34.039Z level=INFO fiber=#0 message=foreground
+timestamp=2024-11-04T09:50:34.042Z level=INFO fiber=#1 message=background
+timestamp=2024-11-04T09:50:35.046Z level=INFO fiber=#0 message=foreground
+timestamp=2024-11-04T09:50:36.049Z level=INFO fiber=#0 message=foreground
+timestamp=2024-11-04T09:50:36.052Z level=INFO fiber=#0 message=Bye
+timestamp=2024-11-04T09:50:39.043Z level=INFO fiber=#1 message=background
+```
+
+</div>
+
+</div>
+
+---
+
+<b color="blue">Effect.forkScoped</b>: forks une child fiber, reliée au scope courant (hérité)
+
+<div class="grid grid-cols-2 gap-x-4">
+
+<div>
+
+```ts {all|3|2,17} {lines:true}
+const program = Effect.gen(function* () {
+      // ^ Effect.Effect<void, never, Scope>
+  yield* Effect.forkScoped(background)
+
+  yield* foreground.pipe(
+    Effect.onExit(() => Effect.log("Bye from Foreground"))
+  )
+});
+
+program.pipe(
+    Effect.zip(
+      pipe(
+        Effect.log('Closing scope')
+        Effect.delay("10 second"),
+      )
+    ),
+    Effect.scoped,
+    Effect.runFork
 )
 ```
 
 </div>
 
-<div class="col-start-3 col-span-5" v-click>
+<div>
 
-```ts
-// RETRY
+```mermaid {scale: 0.8}
+graph TB
+Root[RootFiber #0] -->|Exits| EndOfLife[End Of Life]
+Root[RootFiber #0] -->|Forks a Child Fiber #1| ChildFiber[Background Task]
+InheritedScope[Inherited Scope] -->|Links Lifecycle| ChildFiber[Background Task]
+InheritedScope[Inherited Scope] -->|Closes| EndFibers[Interrupts all fibers attached]
+EndFibers[Interrupts all fibers attached] -->|Interrupts| ChildFiber
+```
 
-import { Effect, pipe, Schedule, Duration } from "effect";
 
-const schedulePolicy = pipe(
-  Schedule.recurs(5),
-  Schedule.addDelay(() => Duration.millis(500)),
-  Schedule.compose(Schedule.elapsed),
-  Schedule.whileOutput(Duration.lessThanOrEqualTo(Duration.seconds(3))),
-  Schedule.whileInput(
-    (error) => error instanceof Error && error.message !== "_"
-  )
-);
-
-const programWithRetryPolicy = pipe(
-  Effect.failSync(() => new Error("Some_error")),
-  Effect.retry(schedulePolicy),
-  Effect.catchAll(() => Effect.sync(() => {
-    console.log("Program ended")
-  }))
-);
+```bash
+timestamp=2024-11-04T10:08:03.277Z level=INFO fiber=#0 message=foreground
+timestamp=2024-11-04T10:08:03.280Z level=INFO fiber=#0 message="Bye from Foreground"
+timestamp=2024-11-04T10:08:06.273Z level=INFO fiber=#1 message=background
+timestamp=2024-11-04T10:08:11.277Z level=INFO fiber=#1 message=background
+timestamp=2024-11-04T10:08:13.286Z level=INFO fiber=#0 message="Closing scope"
 ```
 
 </div>
+
 </div>
+
 
 ---
 
-## **Résilience : la nécessité d'interruption et de cleanup**
+<b color="blue">Effect.forkIn</b>: forks une child fiber, reliée au scope fourni
 
-<div class="grid grid-cols-2 gap-x-4 pt-5">
+<div class="grid grid-cols-2 gap-x-4">
 
 <div>
 
-```ts
-import { setTimeout } from "node:timers/promises";
-
-const leakingRace = () => Promise.race([
-  setTimeout(1000), 
-  setTimeout(10000)
-]);
-
-function raceWithInterruptions() {
-  const abortController1 = new AbortController();
-  const abortController2 = new AbortController();
-
-  async function cancellableTimeout1() {
-    await setTimeout(1000, undefined, { signal: abortController1.signal });
-    abortController2.abort();
-  }
-
-  async function cancellableTimeout2() {
-    await setTimeout(10000, undefined, { signal: abortController2.signal });
-    abortController1.abort();
-  }
-
-  return Promise.race([cancellableTimeout1(), cancellableTimeout2()]);
-}
-```
-</div>
-
-<div v-click>
-
-```ts
-import { Effect } from "effect";
-
-const race = [
-  Effect.sleep(1000),
-  Effect.sleep(10_000).pipe(
-    Effect.onInterrupt(() => Effect.log("interrupted"))
-  ),
-];
-```
-
-<br>
-
-```ts
-const backgroundJob = Effect.async(() => {
-  const timer = setInterval(() => {
-    console.log("processing job...");
-  }, 500);
-
-  return Effect.sync(() => {
-    console.log("releasing resources...");
-    clearInterval(timer);
+```ts {all|1,3,8,12,18} {lines:true}
+const program = (scope: Scope.Scope) =>
+  Effect.gen(function* () {
+    yield* Effect.forkIn(scope)(background);
   });
-});
-```
 
+pipe(
+  Effect.gen(function* () {
+    const scope = yield* Scope.make();
 
-</div>
+    yield* Effect.forkDaemon(
+      pipe(
+        Scope.close(scope, Exit.void),
+        Effect.zip(Effect.log("Scope closed")),
+        Effect.delay("3 second")
+      )
+    );
 
-
-</div>
-
----
-
-## **Concurrence**
-
-<br>
-
-> L'art de gérer des opérations en simultanée ou de manière coopérative avec un contrôle sur leur exécution et des garanties fortes sur l'intégrité de l'état du programme, afin d'améliorer son efficacité.
-
-<b color="blue">"concurrency is about dealing with lots of things at once"</b>, Rob Pike
-
-Gérer la concurrence correctement c'est compliqué :
-
-- Difficile d'avoir un modèle d'exécution déterministe 
-- Problème des ressources partagées + gestion des ressources
-- Deadlocks, race conditions
-- Contrôle et efficacité Mémoire et CPU 
-- ...etc
-
----
-
-## **Concurrence : bounded vs unbounded**
-
-<div class="grid grid-cols-2 gap-x-4 pt-5">
-
-<div v-click>
-
-```ts
-// Unbounded 
-const userIds = Array.from(
-  { length: 1000 }, (_, idx) => idx
-);
-
-function fetchUser(id: number): Promise<User> {}
-
-function retrieveAllUsers() {
-  return Promise.all(userIds.map(fetchUser));
-}
-```
-
-- Pas de gestion des interruptions
-- Pas de garantie sur la libération des ressources
-- Pas de contrôle sur l'exécution concurrente
-- `Promise.allSettled` permet un contrôle plus fin sur le résultat produit mais souffre des mêmes problèmes
-
-<!-- <div class="grid justify-left">
-  <img width="400" src="/unbounded.gif">
-</div> -->
-
-</div>
-
-<div v-click>
-
-```ts
-const users = pipe( 
-  userIds,
-  Effect.forEach(
-    (id) => Effect.promise(() => fetchUser(id)), 
-    { concurrency: 30 },
-    // OR
-    { concurrency: "unbounded" },
-    // OR
-    { concurrency: "inherit" }
-  )
+    yield* program(scope);
+  }),
+  Effect.runFork
 );
 ```
 
 </div>
+
+<div>
+
+```mermaid {scale: 0.8}
+graph TB
+Root[RootFiber #0] -->|Exits| EndOfLife[End Of Life]
+Root[RootFiber #0] -->|Forks a Child Fiber #1| ChildFiber[Background Task]
+CreatedScope[Injected Scope] -->|Links Lifecycle| ChildFiber[Background Task]
+CreatedScope[Injected Scope] -->|Closes| EndFibers[Interrupts all fibers attached]
+EndFibers[Interrupts all fibers attached] -->|Interrupts| ChildFiber
+```
+
+
+```bash
+timestamp=2024-11-04T10:37:43.416Z level=INFO fiber=#2 message=background
+timestamp=2024-11-04T10:37:44.422Z level=INFO fiber=#2 message=background
+timestamp=2024-11-04T10:37:45.426Z level=INFO fiber=#2 message=background
+timestamp=2024-11-04T10:37:46.425Z level=INFO fiber=#1 message="Scope closed"
+```
+
 </div>
 
-<!-- 
+</div>
 
-Transition parfaite vers ressource management
 
--->
+
 ---
 
-## **Resource management**
+## **Effect in a nutshell**
 
 <br>
 
-> L'art de gestion du cycle de vie des ressources allouées lors de l'exécution du programme
-
-<br>
-
-- Proposal "Explicit Resource Management", mais généralisé et plus composable
-- Introduction de Scopes, dès lors qu'on a plus besoin des ressources, des finalizers sont appelés
-- Finalizers appelés dès lors qu'une interruption/erreur d'un Effect est produite
-- Contexte qui contrôle la propagation des scopes, on évite le "props drilling" des Abort Signals 
-- Libération Sync/Async, peut être elle-même rendue interruptible/non-interruptible
-
----
-
-## **Et aussi d'autres modules...**
-
-
-<div class="grid grid-cols-2 gap-x-4 pt-5">
-
-<ul>
-<li>Batching/Caching</li>
-<li>Tracing/Monitoring</li>
-<li>Layer</li>
-<li>Stream</li>
-<li>Queue</li>
-<li>Semaphore </li>
-<li>Pub/Sub </li>
-<li>Config</li>
-</ul>
-
-<ul>
-<li>@effect/schema</li>
-<li>@effect/cli</li>
-<li>@effect/fastify</li>
-<li>@effect/http</li>
-<li>@effect/rpc</li>
-<li>@effect/opentelemetry</li>
-</ul>
-
-</div>
+- Effect sépare la Description (being) de l'évaluation (doing)
+- Un Effect décrit un programme à l'aide d'un DSL qui compose une structure de données immuable et lazy
+- Le runtime natif Effect est fiber-based et utilise la Structured Concurrency 
+- Les Fibers sont orchestrées par le runtime et contrôlées via des actions directes/indirectes
 
 ---
 
