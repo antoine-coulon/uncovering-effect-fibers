@@ -1,5 +1,5 @@
-# effect-a-solution-for-most-common-software-engineering-problems
+# Effect Paris #3 Talk: Uncovering Fibers: The Hidden Power Behind the Effect Library
 
-### Antoine Coulon @ Paris.js #115 - 24/04/2024
+### Antoine Coulon @ Effect Paris #3 - 05/11/2024
 
-https://antoine-coulon.github.io/effect-introduction-for-paris-typescript-meetup
+https://antoine-coulon.github.io/uncovering-effect-fibers
