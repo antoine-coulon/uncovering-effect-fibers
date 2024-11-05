@@ -337,8 +337,6 @@ timestamp=2024-11-04T09:09:09.619Z level=INFO fiber=#2 message="Delayed Task"
 
 ## **Un runtime Fiber-based régi par la Structured Concurrency** 
 
-<br>
-
 - Conceptualise un modèle hiérarchique pour l'ensemble des tâches
 - Offre des garanties fortes : gestion d'erreurs, scope et cycle de vie maitrisés
 - Peut être assimilé à la représentation d'un Process Tree d'un système d'exploitation
