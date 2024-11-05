@@ -41,7 +41,7 @@ css: unocss
       <p class="mt-3">Lead Software Engineer @ <b color="cyan">evryg</b></p>
       <p class="mt-3">Créateur <b color="cyan">skott</b></p>
       <p class="mt-3">Auteur <b color="cyan">effect-introduction</b> </p>
-      <p class="mt-3">Evangéliste <b color="cyan">Effect</b></p>
+      <p class="mt-3">Advocate <b color="cyan">Effect</b></p>
       <p class="mt-3">Contributeur <b color="cyan">Rush.js, NodeSecure</b></p>
     </div>  
   </div>
@@ -56,6 +56,7 @@ css: unocss
   <div class="mt-5">
     <div class="mb-4 flex justify-between"><ri-github-line color="blue"/> <b color="opacity-30 ml-2">antoine-coulon</b></div>
     <div class="mb-4 flex justify-between"><ri-twitter-line color="blue"/> <b color="opacity-30 ml-2">c9antoine</b></div>
+    <div class="mb-4 flex justify-between">LinkedIn: <b color="opacity-30 ml-2">Antoine Coulon</b></div>
     <div class="mb-4 flex justify-between"><ri-user-3-line color="blue"/> <b color="opacity-30 ml-2">dev.to/antoinecoulon</b></div>
   </div>
 </div>
@@ -200,7 +201,7 @@ const primitive = {
 }
 
 export const DumbRuntime = {
-  runSync: <A, E, R>(program: Effect.Effect<A, E, R>) => {
+  runSync: <A, E>(program: Effect.Effect<A, E, never>) => {
     const effect = program as {
       _op: "Sync";
       effect_instruction_i0: () => unknown;
@@ -369,6 +370,17 @@ B[Process A] --> |Manages| D[Thread B]
 
 ---
 
+## **La manipulation directe de Fibers**
+
+<br>
+
+- fork
+- forkDaemon
+- forkScoped
+- forkIn
+
+---
+
 <b color="blue">Effect.fork</b>: forks une child fiber, reliée au cycle de vie de la parent fiber
 
 <div class="grid grid-cols-2 gap-x-4">
@@ -423,7 +435,7 @@ timestamp=2024-11-04T09:33:02.317Z level=INFO fiber=#0 message=Bye
 
 ---
 
-<b color="blue">Effect.forkDaemon</b>: forks une fiber, reliée à la root fiber, détachée du parent
+<b color="blue">Effect.forkDaemon</b>: forks une fiber, reliée à une root fiber, détachée du parent
 
 <div class="grid grid-cols-2 gap-x-4">
 
@@ -461,7 +473,7 @@ program.pipe(Effect.runFork);
 graph LR
 Root[RootFiber #0] -->|Spawns a Daemon Fiber #1| Daemon[Background Task]
 Root[RootFiber #0] -->|Exits| EndOfLife[End Of Life]
-GlobalScope[Global Scope] -->|Links| Daemon[Background Task]
+GlobalScope[Global Scope Fiber] -->|Links| Daemon[Background Task]
 ```
 
 
