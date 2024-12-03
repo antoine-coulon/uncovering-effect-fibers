@@ -42,7 +42,7 @@ css: unocss
       <p class="mt-3">Créateur <b color="cyan">skott</b></p>
       <p class="mt-3">Auteur <b color="cyan">effect-introduction</b> </p>
       <p class="mt-3">Advocate <b color="cyan">Effect</b></p>
-      <p class="mt-3">Contributeur <b color="cyan">Rush.js, NodeSecure</b></p>
+      <p class="mt-3">Contributor <b color="cyan">Rush.js, NodeSecure</b></p>
     </div>  
   </div>
   <div class="border-l border-gray-400 border-opacity-25 !all:leading-12 !all:list-none my-auto">
@@ -74,19 +74,19 @@ css: unocss
 
 ---
 
-## **Les fondations d'Effect**
+## **Effect foundations**
 
 <br>
 
-- La nature d'un Effect 
+- The nature of an Effect 
 
-- Les fondamentaux du runtime Effect
+- Effect runtime fundamentals
 
-- Qu'est-ce qu'une Fiber ?
+- What is a Fiber?
 
 ---
 
-## **La différence fondamentale entre un Effect et une Promise**
+## **The fundamental difference between an Effect and a Promise**
 
 <br>
 
@@ -122,24 +122,24 @@ $ tsx Program.ts
 
 ---
 
-## **La stratégie d'évaluation**
+## **Evaluation strategy**
 
-Une Promise est : 
-- évaluée <b color="blue">eagerly</b>
-- représente déjà une <b color="blue">opération en cours</b>
+A Promise is: 
+- <b color="blue">eagerly</b> evaluated
+- represents a<b color="blue">running operation</b>
 
-Un Effect est :
-- évalué <b color="blue">lazily</b>
-- représente la <b color="blue">description d'une opération</b> 
-- est une <b color="blue">data structure immuable</b>
+An Effect is:
+- <b color="blue">lazily</b> evaluated
+- represents the <b color="blue">description of an operation</b> 
+- is an<b color="blue">immutable data structure</b>
 
 ---
 
-## **Un Effect est une description d'un programme**
+## **An Effect is a description of a program**
 
-Le concept des Programs as Values dont le principe est de séparer :
-- la <b color="blue">description</b> d'un programme (being)
-- de son <b color="blue">interprétation</b> (doing)
+Concept of Programs as Values whose goal is to distinguish:
+- the <b color="blue">description</b> of a program (being)
+- from its <b color="blue">interpretation</b> (doing)
 
 <div v-click>
 <br>
@@ -165,12 +165,12 @@ console.log(program)
 
 --- 
 
-## **La description du programme TypeScript avec le DSL Effect**
+## **The description of a TypeScript program using Effect's DSL**
 
-Effect est un <b color="blue">Domain Specific Language</b>
-- <b color="blue">Embedded</b>, s'intègre à un hôte en l'occurrence TypeScript
+Effect is a<b color="blue">Domain Specific Language</b>
+- <b color="blue">Embedded</b>, meaning that it integrates with a host language, in this case TypeScript
 
-- Utilise un <b color="blue">encoding initial</b>, c'est à dire que la description est séparée de l'interprétation : possibilité d'avoir plusieurs interpréteurs pour une même description
+- Uses an<b color="blue">initial encoding</b>, meaning the description is separated from the interpretation, allowing multiple interpreters to be used for the same description
 
 ```ts
 // Décrit avec TypeScript
@@ -186,7 +186,7 @@ interpreter2.run(program)
 
 ---
 
-## **Passer de la description à l'interprétation**
+## **From description to interpretation**
 
 ```ts {3|4-10|12-13|14-25} {lines:true}
 import { Effect } from "effect"
@@ -218,7 +218,7 @@ export const DumbRuntime = {
 
 ---
 
-### **Ce qu'il se passe dans le vrai runtime Effect**
+### **What happens in the real Effect runtime?**
 
 https://github.com/Effect-TS/effect/blob/8a30e1dfa3a7103bf5414fc6a7fca3088d8c8c00/packages/effect/src/internal/fiberRuntime.ts#L1358
 
@@ -243,7 +243,7 @@ export type Primitive =
 
 ---
 
-## **Et il reste à implémenter...**
+## **We still have many things left to handle...**
 
 <br>
 
@@ -256,19 +256,19 @@ export type Primitive =
 
 ---
 
-## **Fiber : la primitive au coeur du runtime**
+## **Fiber: the primitive at the heart of the Effect runtime**
 
-Une Fiber est une unité d'exécution d'un programme qui est:
+A Fiber is an execution unit of a program, that is:
 
-- Lightweight : assimilée à un virtual/green thread, faible coût de manipulation
-- Non-blocking : faite pour gérer efficacement la concurrence (cooperative multitasking)
-- Est en charge de l'exécution d'un ou plusieurs Effects durant son cycle de vie
-- Low-level : principalement orchestrée via des opérateurs high-level, mais peut être directement contrôlée
-- Stateful : started, suspended, interrupted
+- Lightweight: similar to a virtual/green thread, low handling cost
+- Non-blocking: designed to effectively manage competition (cooperative multitasking)
+- Is responsible of executing one or more Effects during its life cycle
+- Low-level: mainly orchestrated via high-level operators, but can be directly controlled with the Fiber module
+- Stateful: started, suspended, interrupted
 
 ---
 
-## **L'exécution d'un Effect est inévitablement liée à une Fiber**
+## **The execution of an Effect is inevitably associated to a Fiber**
 
 <br>
 
@@ -281,7 +281,7 @@ Effect.runSync(log)
 ```
 
 <div v-click>
-L'exécution d'un Effect est forcément liée à une Fiber
+A Fiber is there, running the Effect
 
 ```bash
 $ tsx Program.ts
@@ -291,7 +291,7 @@ $ tsx Program.ts
 
 ---
 
-## **La manipulation indirecte de Fibers #1**
+## **Indirect use of Fibers #1**
 
 ```ts
 pipe(
@@ -313,7 +313,7 @@ timestamp=2024-11-04T09:00:59.589Z level=INFO fiber=#0 message="Immediate Task"
 
 ---
 
-## **La manipulation indirecte de Fibers #2**
+## **Indirect use of Fibers #2**
 
 ```ts
 pipe(
@@ -336,11 +336,11 @@ timestamp=2024-11-04T09:09:09.619Z level=INFO fiber=#2 message="Delayed Task"
 
 ---
 
-## **Un runtime Fiber-based régi par la Structured Concurrency** 
+## **A Fiber-based runtime governed by Structured Concurrency** 
 
-- Conceptualise un modèle hiérarchique pour l'ensemble des tâches
-- Offre des garanties fortes : gestion d'erreurs, scope et cycle de vie maitrisés
-- Peut être assimilé à la représentation d'un Process Tree d'un système d'exploitation
+- Conceptualizes a hierarchical model for all tasks
+- Offers strong guarantees: error management, controlled scope and life cycle
+- Can be more or less compared to the representation of a Process Tree of an operating system
 
 <div class="grid grid-cols-2 gap-x-4">
 <div>
@@ -370,7 +370,7 @@ B[Process A] --> |Manages| D[Thread B]
 
 ---
 
-## **La manipulation directe de Fibers**
+## **Direct use of Fibers**
 
 <br>
 
@@ -381,11 +381,12 @@ B[Process A] --> |Manages| D[Thread B]
 
 ---
 
-<b color="blue">Effect.fork</b>: forks une child fiber, reliée au cycle de vie de la parent fiber
+<b color="blue">Effect.fork</b>: forks a child fiber, linked to the life cycle of its parent fiber
 
 <div class="grid grid-cols-2 gap-x-4">
 
 <div>
+
 ```ts {all|17} {lines:true}
 const background = pipe(
   Effect.log("background"),
@@ -435,7 +436,7 @@ timestamp=2024-11-04T09:33:02.317Z level=INFO fiber=#0 message=Bye
 
 ---
 
-<b color="blue">Effect.forkDaemon</b>: forks une fiber, reliée à une root fiber, détachée du parent
+<b color="blue">Effect.forkDaemon</b>: forks a fiber, connected to a root fiber, detached from the parent
 
 <div class="grid grid-cols-2 gap-x-4">
 
@@ -492,7 +493,7 @@ timestamp=2024-11-04T09:50:39.043Z level=INFO fiber=#1 message=background
 
 ---
 
-<b color="blue">Effect.forkScoped</b>: forks une child fiber, reliée au scope courant (hérité)
+<b color="blue">Effect.forkScoped</b>: forks a child fiber, whose lifecycle is linked to the inherited scope
 
 <div class="grid grid-cols-2 gap-x-4">
 
@@ -549,7 +550,7 @@ timestamp=2024-11-04T10:08:13.286Z level=INFO fiber=#0 message="Closing scope"
 
 ---
 
-<b color="blue">Effect.forkIn</b>: forks une child fiber, reliée au scope fourni
+<b color="blue">Effect.forkIn</b>: forks a child fiber, whose lifecycle is linked to the provided scope
 
 <div class="grid grid-cols-2 gap-x-4">
 
@@ -612,14 +613,14 @@ timestamp=2024-11-04T10:37:46.425Z level=INFO fiber=#1 message="Scope closed"
 
 <br>
 
-- Effect sépare la Description (being) de l'évaluation (doing)
-- Un Effect décrit un programme à l'aide d'un DSL qui compose une structure de données immuable et lazy
-- Le runtime natif Effect est fiber-based et utilise la Structured Concurrency 
-- Les Fibers sont orchestrées par le runtime et contrôlées via des actions directes/indirectes
+- Effect separates description (being) from evaluation (doing)
+- An Effect describes a program using a DSL which composes an immutable and lazy data structure
+- The native Effect runtime is fiber-based and uses Structured Concurrency 
+- Fibers are orchestrated by the runtime and controlled via direct/indirect actions
 
 ---
 
-## **Merci d'avoir écouté !**
+## **Thanks for listening!**
 
 - **Effect website**: <b color="cyan">https://effect.website</b>
   
