@@ -24,20 +24,20 @@ jobs:
 
       - uses: actions/setup-node@v3
         with:
-          node-version: 'lts/*'
+          node-version: "lts/*"
 
       - name: Install dependencies
         run: npm install
 
       - name: Install slidev
-        run:  npm i -g @slidev/theme-default && npm i -g @slidev/cli
+        run: npm i -g @slidev/theme-default && npm i -g @slidev/cli
 
       - name: Build
         run: slidev build --base /uncovering-effect-fibers/
 
       - uses: actions/configure-pages@v3
 
-      - uses: actions/upload-pages-artifact@v1
+      - uses: actions/upload-pages-artifact@v3
         with:
           path: dist
 
